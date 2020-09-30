@@ -26,7 +26,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *arastu
  */
 
 
@@ -34,24 +33,17 @@
 
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/garnet2.0/CreditLink.hh"
-#include "mem/ruby/network/garnet2.0/CrossbarSwitch.hh"
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/OutputUnit.hh"
-#include "mem/ruby/network/garnet2.0/RoutingUnit.hh"
-#include "mem/ruby/network/garnet2.0/SwitchAllocator.hh"
 
 using namespace std;
 
 Router::Router(const Params *p)
   : BasicRouter(p), Consumer(this), m_latency(p->latency),
     m_virtual_networks(p->virt_nets), m_vc_per_vnet(p->vcs_per_vnet),
-    m_num_vcs(m_virtual_networks * m_vc_per_vnet),
-    /**/
-    m_bit_width(p->width),
-    DPRINTF(RubyNetwork, "Created with bitwidth:%d\n", m_bit_width);
-    m_network_ptr(nullptr),
+    m_num_vcs(m_virtual_networks * m_vc_per_vnet), m_network_ptr(nullptr),
     routingUnit(this), switchAllocator(this), crossbarSwitch(this)
 {
     m_input_unit.clear();
@@ -98,13 +90,6 @@ void
 Router::addInPort(PortDirection inport_dirn,
                   NetworkLink *in_link, CreditLink *credit_link)
 {
-    DPRINTF(RubyNetwork, "%d == %d? %s\n", in_link->bitWidth,
-    m_bit_width, in_link->name());
-    
-    fatal_if(in_link->bitWidth != m_bit_width, "Widths of link %s(%d)does"
-    " not match that of Router%d(%d). Consider inserting SerDes "
-    "Units.", in_link->name(), in_link->bitWidth, m_id, m_bit_width);
-    
     int port_num = m_input_unit.size();
     InputUnit *input_unit = new InputUnit(port_num, inport_dirn, this);
 
@@ -124,13 +109,6 @@ Router::addOutPort(PortDirection outport_dirn,
                    const NetDest& routing_table_entry, int link_weight,
                    CreditLink *credit_link)
 {
-    
-    DPRINTF(RubyNetwork, "%d == %d? %s\n", out_link->bitWidth,
-            m_bit_width, out_link->name());
-
-    fatal_if(out_link->bitWidth != m_bit_width, "Widths of units do not match."
-            " Consider inserting SerDes Units");
-    
     int port_num = m_output_unit.size();
     OutputUnit *output_unit = new OutputUnit(port_num, outport_dirn, this);
 

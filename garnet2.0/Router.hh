@@ -26,7 +26,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *arastu
  */
 
 
@@ -126,11 +125,9 @@ class Router : public BasicRouter, public Consumer
         return m_network_ptr->fault_model->fault_prob(m_id, temperature,
                                                       aggregate_fault_prob);
     }
-    bool functionalRead(Packet *);
+
     uint32_t functionalWrite(Packet *);
 
-    uint32_t m_bit_width;
-    
   private:
     Cycles m_latency;
     int m_virtual_networks, m_vc_per_vnet, m_num_vcs;
