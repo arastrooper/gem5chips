@@ -143,13 +143,13 @@ GarnetNetwork::init()
     }
 }
 
-GarnetNetwork::~GarnetNetwork()
-{
-    deletePointers(m_routers);
-    deletePointers(m_nis);
-    deletePointers(m_networklinks);
-    deletePointers(m_creditlinks);
-}
+//GarnetNetwork::~GarnetNetwork()
+//{
+//    deletePointers(m_routers);
+//    deletePointers(m_nis);
+//    deletePointers(m_networklinks);
+//    deletePointers(m_creditlinks);
+//}
 
 /*
  * This function creates a link from the Network Interface (NI)
