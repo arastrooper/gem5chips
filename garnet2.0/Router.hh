@@ -126,6 +126,7 @@ class Router : public BasicRouter, public Consumer
                                                       aggregate_fault_prob);
     }
 
+    bool functionalRead(Packet *);
     uint32_t functionalWrite(Packet *);
 
   private:
