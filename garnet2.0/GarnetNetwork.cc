@@ -26,7 +26,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Author : Arastu
+ * Authors: Niket Agarwal
+ *          Tushar Krishna
  */
 
 
@@ -112,18 +113,18 @@ GarnetNetwork::init()
     assert(m_topology_ptr != NULL);
     m_topology_ptr->createLinks(this);
 
-   // Initialize topology specific parameters
-    //    if (getNumRows() > 0) {
-    //        // Only for Mesh topology
-    //        // m_num_rows and m_num_cols are only used for
-    //        // implementing XY or custom routing in RoutingUnit.cc
-    //        m_num_rows = getNumRows();
-    //        m_num_cols = m_routers.size() / m_num_rows;
-    //        assert(m_num_rows * m_num_cols == m_routers.size());
-    //    } else {
-            m_num_rows = -1;
-            m_num_cols = -1;
-    //    }
+    // Initialize topology specific parameters
+//    if (getNumRows() > 0) {
+//        // Only for Mesh topology
+//        // m_num_rows and m_num_cols are only used for
+//        // implementing XY or custom routing in RoutingUnit.cc
+//        m_num_rows = getNumRows();
+//        m_num_cols = m_routers.size() / m_num_rows;
+//        assert(m_num_rows * m_num_cols == m_routers.size());
+//    } else {
+        m_num_rows = -1;
+        m_num_cols = -1;
+//    }
 
     // FaultModel: declare each router to the fault model
     if (isFaultModelEnabled()) {
@@ -160,7 +161,7 @@ GarnetNetwork::init()
 
 void
 GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
-                            const NetDest& routing_table_entry)
+                            std::vector<NetDest>& routing_table_entry)
 {
     assert(src < m_nodes);
 
@@ -175,11 +176,8 @@ GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
     m_creditlinks.push_back(credit_link);
 
     PortDirection dst_inport_dirn = "Local";
-/*m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
-    m_nis[src]->addOutPort(net_link, credit_link, dest);*/
-   
-    /*ClockedObject *extNode = garnet_link->params()->ext_node;
-    m_nis[src]->setClockDomain(extNode->getClockDomain());*/
+    ClockedObject *extNode = garnet_link->params()->ext_node;
+    //m_nis[src]->setClockDomain(extNode->getClockDomain());
 
     if (garnet_link->nicClipEn) {
         DPRINTF(RubyNetwork, "Enable CLIP at NIC for %s\n",
@@ -201,6 +199,7 @@ GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
     } else {
         m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
     }
+
 }
 
 /*
@@ -211,7 +210,7 @@ GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
 
 void
 GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
-                             const NetDest& routing_table_entry)
+                             std::vector<NetDest>& routing_table_entry)
 {
     assert(dest < m_nodes);
     assert(src < m_routers.size());
@@ -228,12 +227,7 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
     m_creditlinks.push_back(credit_link);
 
     PortDirection src_outport_dirn = "Local";
-    
-    /*m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);
-    m_nis[dest]->addInPort(net_link, credit_link);*/
-    
+
     if (garnet_link->nicClipEn) {
         DPRINTF(RubyNetwork, "Enable CLIP at NIC for %s\n",
             garnet_link->name());
@@ -258,7 +252,6 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
                        routing_table_entry,
                        link->m_weight, credit_link);
     }
-    
 }
 
 /*
@@ -268,7 +261,7 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
 
 void
 GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
-                                const NetDest& routing_table_entry,
+                                std::vector<NetDest>& routing_table_entry,
                                 PortDirection src_outport_dirn,
                                 PortDirection dst_inport_dirn)
 {
@@ -282,11 +275,6 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
     m_networklinks.push_back(net_link);
     m_creditlinks.push_back(credit_link);
 
-    /*m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
-    m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);*/
-    
     if (garnet_link->rxClipEn) {
         DPRINTF(RubyNetwork, "Enable CLIP at Rx for %s\n",
             garnet_link->name());
@@ -308,7 +296,6 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
                         routing_table_entry,
                         link->m_weight, credit_link);
     }
-    
 }
 
 // Total routers in the network
@@ -320,9 +307,9 @@ GarnetNetwork::getNumRouters()
 
 // Get ID of router connected to a NI.
 int
-GarnetNetwork::get_router_id(int ni)
+GarnetNetwork::get_router_id(int ni, int vnet)
 {
-    return m_nis[ni]->get_router_id();
+    return m_nis[ni]->get_router_id(vnet);
 }
 
 void
